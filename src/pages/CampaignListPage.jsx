@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
@@ -284,8 +284,8 @@ export function CampaignListPage() {
           <p className="muted">No campaigns found for selected filters.</p>
         ) : (
           <>
-            <div className="table-wrap">
-              <table className="table">
+            <div className="table-wrap campaign-table-wrap">
+              <table className="table campaign-table">
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -357,20 +357,57 @@ function CampaignRow({
   const [localIds, setLocalIds] = useState(() =>
     (campaign.assigned_users || []).map((u) => u.id),
   )
+  const [assignOpen, setAssignOpen] = useState(false)
+  const [assignSearch, setAssignSearch] = useState('')
   const fileInputId = useId()
+  const assignRef = useRef(null)
 
   useEffect(() => {
     setLocalIds((campaign.assigned_users || []).map((u) => u.id))
+    setAssignOpen(false)
+    setAssignSearch('')
   }, [campaign])
+
+  useEffect(() => {
+    if (!assignOpen) return
+
+    function onPointerDown(event) {
+      if (!assignRef.current?.contains(event.target)) {
+        setAssignOpen(false)
+      }
+    }
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') {
+        setAssignOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [assignOpen])
+
+  const filteredAdvertisers = advertisers.filter((u) =>
+    u.username.toLowerCase().includes(assignSearch.trim().toLowerCase()),
+  )
+  const selectedAdvertisers = advertisers.filter((u) => localIds.includes(u.id))
+  const selectedText =
+    selectedAdvertisers.length > 0
+      ? selectedAdvertisers.map((u) => u.username).join(', ')
+      : 'Select advertisers'
 
   function toggleAdvertiser(id) {
     setLocalIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id],
     )
   }
 
   return (
-    <tr>
+    <tr className={assignOpen ? 'campaign-row campaign-row--assign-open' : 'campaign-row'}>
       <td>
         <div className="strong">{campaign.name}</div>
         {campaign.description && (
@@ -406,26 +443,49 @@ function CampaignRow({
       )}
       {isAdmin && (
         <td>
-          <div className="assign-list">
-            {advertisers.map((u) => (
-              <label key={u.id} className="check">
+          <div ref={assignRef} className="assign-search-select">
+            <button
+              type="button"
+              className="assign-search-select__trigger"
+              onClick={() => setAssignOpen((open) => !open)}
+            >
+              {selectedText}
+            </button>
+            {assignOpen && (
+              <div className="assign-search-select__menu">
                 <input
-                  type="checkbox"
-                  checked={localIds.includes(u.id)}
-                  onChange={() => toggleAdvertiser(u.id)}
+                  type="text"
+                  className="assign-search-select__input"
+                  placeholder="Search advertiser"
+                  value={assignSearch}
+                  onChange={(e) => setAssignSearch(e.target.value)}
                 />
-                {u.username}
-              </label>
-            ))}
-            {advertisers.length === 0 && (
-              <span className="muted small">No advertiser users.</span>
+                <div className="assign-search-select__list">
+                  {filteredAdvertisers.map((u) => (
+                    <label key={u.id} className="assign-search-select__option">
+                      <input
+                        type="checkbox"
+                        checked={localIds.includes(u.id)}
+                        onChange={() => toggleAdvertiser(u.id)}
+                      />
+                      <span>{u.username}</span>
+                    </label>
+                  ))}
+                  {filteredAdvertisers.length === 0 && (
+                    <span className="muted small">No advertiser found.</span>
+                  )}
+                </div>
+              </div>
             )}
           </div>
           <button
             type="button"
             className="btn btn-small btn-primary"
             disabled={busy}
-            onClick={() => onSaveAssignments(localIds)}
+            onClick={() => {
+              setAssignOpen(false)
+              onSaveAssignments(localIds)
+            }}
           >
             Save assignments
           </button>
