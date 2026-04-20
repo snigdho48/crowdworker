@@ -1248,22 +1248,6 @@ body {
   font-size: 0.95rem;
 }
 
-.auth-dev-credentials {
-  margin: 0.2rem 0 0;
-  padding: 0.6rem 0.72rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(129, 140, 248, 0.25);
-  background: rgba(99, 102, 241, 0.1);
-  color: #d6defe;
-  font-size: 0.8rem;
-  line-height: 1.45;
-}
-
-.auth-dev-credentials code {
-  color: #eef1ff;
-  font-size: 0.84em;
-}
-
 .auth-form {
   display: grid;
   gap: 0.9rem;

@@ -38,10 +38,6 @@ export function LoginPage() {
           <p className="auth-card__subtitle">
             Use an admin or advertiser account to continue.
           </p>
-          <p className="auth-dev-credentials">
-            Dev defaults: <code>admin / admin123</code> and{' '}
-            <code>advertiser1 / ad123</code>
-          </p>
         </header>
 
         <div className="auth-form">
