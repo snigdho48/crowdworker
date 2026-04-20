@@ -15,9 +15,16 @@ EXPECTED_HEADERS = {
     "publisher",
 }
 
+SUMMARY_DATE_TOKENS = {"total", "grand total", "subtotal"}
+
 
 def _norm_header(value: Any) -> str:
     return str(value or "").strip().lower()
+
+
+def _is_summary_row(date_cell: Any) -> bool:
+    text = str(date_cell or "").strip().lower()
+    return text in SUMMARY_DATE_TOKENS
 
 
 def _parse_date(cell: Any) -> date:
@@ -75,6 +82,8 @@ def parse_campaign_excel(file_obj) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for row_num, row in enumerate(rows_iter, start=2):
         if row is None or all(v is None or str(v).strip() == "" for v in row):
+            continue
+        if _is_summary_row(row[col_index["date"]]):
             continue
         try:
             item = {
