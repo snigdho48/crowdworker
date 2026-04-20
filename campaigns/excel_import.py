@@ -18,6 +18,7 @@ EXPECTED_HEADERS = {
 SUMMARY_DATE_TOKENS = {"total", "grand total", "subtotal"}
 
 
+
 def _norm_header(value: Any) -> str:
     return str(value or "").strip().lower()
 
