@@ -12,7 +12,6 @@ SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-dev-only-change-in-production",
 )
-
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -25,6 +24,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -71,19 +71,42 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DB_NAME", "crowdworkdb"),
-        "USER": os.environ.get("DB_USER", "crowdworkeruser"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "Crowdworker@2026"),
-        "HOST": os.environ.get("DB_HOST", "178.128.212.149"),
-        "PORT": os.environ.get("DB_PORT", "3306"),
-        "OPTIONS": {
-            "charset": "utf8mb4",
-        },
+DB_MODE = os.environ.get("DJANGO_DB", "mysql").lower()
+
+if DB_MODE == "mysql":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.environ.get("DB_NAME", "crowdworkdb"),
+            "USER": os.environ.get("DB_USER", "crowdworkeruser"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", "Crowdworker@2026"),
+            "HOST": os.environ.get("DB_HOST", "178.128.212.149"),
+            "PORT": os.environ.get("DB_PORT", "3306"),
+            "OPTIONS": {
+                "charset": "utf8mb4",
+            },
+        }
     }
-}
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.mysql",
+    #         "NAME": os.environ.get("DB_NAME", "crowdworkdb"),
+    #         "USER": os.environ.get("DB_USER", "root"),
+    #         "PASSWORD": os.environ.get("DB_PASSWORD", "azsx1234"),
+    #         "HOST": os.environ.get("DB_HOST", "localhost"),
+    #         "PORT": os.environ.get("DB_PORT", "3306"),
+    #         "OPTIONS": {
+    #             "charset": "utf8mb4",
+    #         },
+    #     }
+    # }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -118,4 +141,3 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": False,
 }
-

@@ -15,17 +15,20 @@ EXPECTED_HEADERS = {
     "publisher",
 }
 
-SUMMARY_DATE_TOKENS = {"total", "grand total", "subtotal"}
-
+OPTIONAL_HEADERS = {
+    "domain",
+    "app",
+    "creative",
+    "device_type",
+    "device type",
+    "city",
+    "age",
+    "carrier",
+}
 
 
 def _norm_header(value: Any) -> str:
     return str(value or "").strip().lower()
-
-
-def _is_summary_row(date_cell: Any) -> bool:
-    text = str(date_cell or "").strip().lower()
-    return text in SUMMARY_DATE_TOKENS
 
 
 def _parse_date(cell: Any) -> date:
@@ -73,7 +76,7 @@ def parse_campaign_excel(file_obj) -> list[dict[str, Any]]:
     col_index = {}
     for idx, raw in enumerate(header_row):
         key = _norm_header(raw)
-        if key in EXPECTED_HEADERS:
+        if key in EXPECTED_HEADERS or key in OPTIONAL_HEADERS:
             col_index[key] = idx
 
     missing = EXPECTED_HEADERS - set(col_index.keys())
@@ -84,16 +87,28 @@ def parse_campaign_excel(file_obj) -> list[dict[str, Any]]:
     for row_num, row in enumerate(rows_iter, start=2):
         if row is None or all(v is None or str(v).strip() == "" for v in row):
             continue
-        if _is_summary_row(row[col_index["date"]]):
-            continue
         try:
-            item = {
+            item: dict[str, Any] = {
                 "date": _parse_date(row[col_index["date"]]),
                 "impressions": _parse_int(row[col_index["impressions"]]),
                 "clicks": _parse_int(row[col_index["clicks"]]),
                 "spend": _parse_decimal(row[col_index["spend"]]),
                 "publisher": str(row[col_index["publisher"]] or "").strip(),
             }
+
+            def opt(name: str) -> str:
+                idx = col_index.get(name)
+                if idx is None:
+                    return ""
+                return str(row[idx] or "").strip()
+
+            item["domain"] = opt("domain")
+            item["app"] = opt("app")
+            item["creative"] = opt("creative")
+            item["device_type"] = opt("device_type") or opt("device type")
+            item["city"] = opt("city")
+            item["age"] = opt("age")
+            item["carrier"] = opt("carrier")
         except (IndexError, ValueError, TypeError) as exc:
             raise ValueError(f"Row {row_num}: {exc}") from exc
         out.append(item)

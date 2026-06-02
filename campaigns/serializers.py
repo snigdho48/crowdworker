@@ -16,6 +16,13 @@ class CampaignMetricRowSerializer(serializers.ModelSerializer):
             "clicks",
             "spend",
             "publisher",
+            "domain",
+            "app",
+            "creative",
+            "device_type",
+            "city",
+            "age",
+            "carrier",
             "batch_id",
             "created_at",
         )
@@ -24,6 +31,9 @@ class CampaignMetricRowSerializer(serializers.ModelSerializer):
 
 class CampaignSerializer(serializers.ModelSerializer):
     assigned_users = serializers.SerializerMethodField()
+    impressions = serializers.IntegerField(read_only=True)
+    clicks = serializers.IntegerField(read_only=True)
+    spend = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Campaign
@@ -31,6 +41,15 @@ class CampaignSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "type",
+            "start_date",
+            "end_date",
+            "status",
+            "brief",
+            "screenshot",
+            "impressions",
+            "clicks",
+            "spend",
             "created_at",
             "updated_at",
             "assigned_users",
