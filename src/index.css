@@ -1,74 +1,15 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
-:root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto,
-    sans-serif;
-  line-height: 1.5;
-  font-weight: 450;
-  font-feature-settings: 'ss01' on, 'cv01' on;
-  color-scheme: dark;
-
-  --bg: #070a14;
-  --bg-elevated: #0c101f;
-  --surface: rgba(18, 24, 44, 0.72);
-  --surface-solid: #12182c;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.11);
-  --text: #f4f6ff;
-  --muted: #8b93b8;
-  --muted2: #5c668d;
-
-  --accent: #6366f1;
-  --accent-dim: rgba(99, 102, 241, 0.14);
-  --cyan: #22d3ee;
-  --cyan-dim: rgba(34, 211, 238, 0.12);
-  --emerald: #34d399;
-  --emerald-dim: rgba(52, 211, 153, 0.12);
-  --amber: #fbbf24;
-  --amber-dim: rgba(251, 191, 36, 0.14);
-  --rose: #fb7185;
-  --rose-dim: rgba(251, 113, 133, 0.12);
-
-  --shadow-lg: 0 22px 48px -12px rgba(0, 0, 0, 0.55);
-  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.2);
-  --input-bg: rgba(6, 9, 20, 0.7);
-  --radius: 14px;
-  --radius-sm: 10px;
-  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --motion-fast: 160ms;
-  --motion-base: 240ms;
-  --motion-slow: 340ms;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  scroll-behavior: smooth;
+/* Light, minimal base (dashboard UI is Tailwind-driven). */
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-}
-
-code {
-  font-family: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Menlo, Consolas,
-    monospace;
-  font-size: 0.85em;
-}
-
-::selection {
-  background: color-mix(in oklab, var(--accent) 40%, transparent);
-  color: #fff;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
 }

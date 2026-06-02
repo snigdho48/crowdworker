@@ -1,65 +1,64 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { login as apiLogin, logout as apiLogout, refreshMe } from '../api/client'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { api, login as apiLogin, logout as apiLogout, refreshMe } from '../api/client'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  const loadUser = useCallback(async () => {
-    const token = localStorage.getItem('access')
-    if (!token) {
-      setUser(null)
-      setLoading(false)
-      return
-    }
-    try {
-      const me = await refreshMe()
-      setUser(me)
-    } catch {
-      apiLogout()
-      setUser(null)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const [ready, setReady] = useState(() => !localStorage.getItem('access'))
 
   useEffect(() => {
-    loadUser()
-  }, [loadUser])
+    let cancelled = false
+    const token = localStorage.getItem('access')
+    if (!token) {
+      return
+    }
+    refreshMe()
+      .then((me) => {
+        if (!cancelled) setUser(me)
+      })
+      .catch(() => {
+        apiLogout()
+      })
+      .finally(() => {
+        if (!cancelled) setReady(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const login = useCallback(
-    async (username, password) => {
-      await apiLogin(username, password)
-      const me = await refreshMe()
-      setUser(me)
-    },
-    [],
-  )
+  async function login(username, password) {
+    await apiLogin(username, password)
+    const me = await refreshMe()
+    setUser(me)
+  }
 
-  const logout = useCallback(() => {
+  function logout() {
     apiLogout()
     setUser(null)
-  }, [])
+  }
 
   const value = useMemo(
     () => ({
+      api,
       user,
-      loading,
-      isAdmin: user?.role === 'admin',
+      ready,
       login,
       logout,
-      refreshUser: loadUser,
+      isAuthed: Boolean(user),
+      isAdmin: user?.role === 'admin',
     }),
-    [user, loading, login, logout, loadUser],
+    [user, ready],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
+  const v = useContext(AuthContext)
+  if (!v) throw new Error('useAuth must be used within AuthProvider')
+  return v
 }
+

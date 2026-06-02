@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { startGlobalLoading, stopGlobalLoading } from '../lib/loaderBus'
 
 const API_BASE = "https://crowdwork360.com";
 
@@ -12,22 +11,14 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  config.__withLoader = true
-  startGlobalLoading()
   return config
 })
 
 api.interceptors.response.use(
   (response) => {
-    if (response.config?.__withLoader) {
-      stopGlobalLoading()
-    }
     return response
   },
   (error) => {
-    if (error.config?.__withLoader) {
-      stopGlobalLoading()
-    }
     return Promise.reject(error)
   },
 )
